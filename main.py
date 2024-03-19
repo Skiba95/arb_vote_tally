@@ -67,12 +67,12 @@ def vote(proposal_id, support, private_key):
 
     logger.info(f" Vote on {caller}")
     
-    nonce = w3.eth.get_transaction_count(caller)
     transaction = contract.functions.castVote(proposal_id, support).build_transaction({
-        'gas': gas,
-        'gasPrice': w3.to_wei('0.1', 'gwei'),  
-        'nonce': nonce,
+        'gasPrice': w3.eth.gas_price,  
+        'nonce': w3.eth.get_transaction_count(caller),
     })
+
+    transaction["gas"] = w3.eth.estimate_gas(transaction)
     signed_txn = w3.eth.account.sign_transaction(transaction, private_key=private_key)
     tx_hash = w3.eth.send_raw_transaction(signed_txn.rawTransaction)
     tx_receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
@@ -88,5 +88,6 @@ for private_key in private_keys:
     except Exception as e:
         logger.error(f"Error occurred while processing transaction: {e}")
         
-    logger.info(f"Sleep before next wallet {delay_between_votes} sec")
-    time.sleep(delay_between_votes)
+    x = random.randint(sleep_wallet_from, sleep_wallet_to)
+    logger.info(f"Slepping before next wallet {x} seconds")
+    time.sleep(x) 
